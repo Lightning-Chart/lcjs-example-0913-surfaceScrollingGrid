@@ -84,15 +84,15 @@ Direct developer email support can be purchased through a [Support Plan][4] or b
 © Arction Ltd 2009-2020. All rights reserved.
 
 
-[3D chart]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/classes/chart3d.html
-[3D axis]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/
-[Paletted Fill]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/classes/palettedfill.html
-[Color lookup table]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/classes/lut.html
-[Color HSV factory]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/globals.html#colorhsv
-[Color shading styles (3D)]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/
-[Surface Grid Series]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/
-[Heatmap Grid Series]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/classes/heatmapgridseriesintensityvalues.html
-[Legend Box]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/classes/chartxy.html#addlegendbox
-[Axis scroll strategies]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/globals.html#axisscrollstrategies
-[Axis tick strategies]: https://www.arction.com/lightningchart-js-api-documentation/v3.1.0/globals.html#axistickstrategies
+[3D chart]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/classes/chart3d.html
+[3D axis]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/
+[Paletted Fill]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/classes/palettedfill.html
+[Color lookup table]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/classes/lut.html
+[Color HSV factory]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/globals.html#colorhsv
+[Color shading styles (3D)]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/
+[Surface Grid Series]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/
+[Heatmap Grid Series]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/classes/heatmapgridseriesintensityvalues.html
+[Legend Box]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/classes/chartxy.html#addlegendbox
+[Axis scroll strategies]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/globals.html#axisscrollstrategies
+[Axis tick strategies]: https://www.arction.com/lightningchart-js-api-documentation/v3.3.0/globals.html#axistickstrategies
 
