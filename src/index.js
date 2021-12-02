@@ -31,7 +31,7 @@ let labelLoading = dashboard.addUIElement().setText("Loading example data ...");
 // Load example data from file.
 fetch(
   document.head.baseURI +
-    "examples/assets/lcjs_example_0913_surfaceScrollingGrid-audio2ch.json"
+    "examples/assets/0913/audio2ch.json"
 )
   .then((r) => r.json())
   .then((data) => {
