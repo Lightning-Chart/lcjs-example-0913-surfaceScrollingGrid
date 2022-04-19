@@ -14,7 +14,10 @@ const {
   Themes,
 } = lcjs;
 
-const HISTORY_SAMPLES = 2000;
+const historyMs = 27 * 1000;
+// Sampling rate as samples per second.
+const sampleRateHz = 35
+const sampleIntervalMs = 1000 / sampleRateHz
 
 // Create empty dashboard and charts.
 const dashboard = lightningChart()
@@ -82,8 +85,6 @@ fetch(
     });
 
     const rowStep = 40;
-    const samplesPerFrame = 2;
-    const columnStep = 1000 / 60 / samplesPerFrame;
     const intensityValueToDb = (value) => -100 + (value / 255) * (-30 - -100);
 
     let channelList = [
@@ -111,7 +112,7 @@ fetch(
         .getDefaultAxisX()
         .setTickStrategy(AxisTickStrategies.Time)
         .setScrollStrategy(AxisScrollStrategies.progressive)
-        .setInterval(-HISTORY_SAMPLES * columnStep, 0);
+        .setInterval(-historyMs, 0);
       chart2D.getDefaultAxisY().setTitle("Frequency (Hz)");
 
       const chart3D = dashboard
@@ -125,7 +126,7 @@ fetch(
         .getDefaultAxisX()
         .setTickStrategy(AxisTickStrategies.Time)
         .setScrollStrategy(AxisScrollStrategies.progressive)
-        .setInterval(-HISTORY_SAMPLES * columnStep, 0);
+        .setInterval(-historyMs, 0);
       chart3D
         .getDefaultAxisY()
         .setTitle("Intensity (Db)")
@@ -138,7 +139,7 @@ fetch(
         .addHeatmapScrollingGridSeries({
           scrollDimension: "columns",
           resolution: rows,
-          step: { x: columnStep, y: rowStep },
+          step: { x: sampleIntervalMs, y: rowStep },
         })
         .setFillStyle(new PalettedFill({ lut }))
         .setWireframeStyle(emptyLine)
@@ -147,9 +148,9 @@ fetch(
       const surfaceSeries3D = chart3D
         .addSurfaceScrollingGridSeries({
           scrollDimension: "columns",
-          columns: HISTORY_SAMPLES,
+          columns: Math.ceil(historyMs / sampleIntervalMs),
           rows,
-          step: { x: columnStep, z: rowStep },
+          step: { x: sampleIntervalMs, z: rowStep },
         })
         .setFillStyle(new PalettedFill({ lut, lookUpProperty: "y" }))
         .setWireframeStyle(emptyLine);
@@ -159,22 +160,60 @@ fetch(
 
     // Setup infinite streaming from static data set.
     let iSample = 0;
-    const streamMoreData = () => {
-      const channelNewSamples = channelList.map((_) => []);
-      const newSamplesCount = samplesPerFrame;
-      for (let iNewSample = 0; iNewSample < newSamplesCount; iNewSample += 1) {
+    setInterval(() => {
+      // Push 1 new sample to all channels and series.
+      const samples = channelList.map(channel => channel.data[iSample % channel.data.length])
+      iSample += 1
+      bufferIncomingSamples(samples, (appendSamples) => {
         channelList.forEach((channel, i) => {
-          const sample =
-            channel.data[(iSample + iNewSample) % channel.data.length];
-          channelNewSamples[i].push(sample);
+          channel.heatmapSeries2D.addIntensityValues([appendSamples[i]]);
+          channel.surfaceSeries3D.addValues({ yValues: [appendSamples[i]] });
         });
+      })
+    }, sampleIntervalMs)
+
+    // The following logic ensures a static sampling rate, even if input data might vary.
+    // This is done by skipping too frequent samples and duplicating too far apart samples.
+    // The precision can be configured by simply changing value of `sampleRateHz`
+    let lastSample
+    let tFirstSample = 0
+    const bufferIncomingSamples = (sample, clbk) => {
+      const tNow = performance.now()
+      if (lastSample === undefined) {
+          clbk(sample)
+          lastSample = { sample, time: tNow, i: 0 }
+          tFirstSample = tNow
+          return
       }
-      channelList.forEach((channel, i) => {
-        channel.heatmapSeries2D.addIntensityValues(channelNewSamples[i]);
-        channel.surfaceSeries3D.addValues({ yValues: channelNewSamples[i] });
-      });
-      iSample += newSamplesCount;
-      requestAnimationFrame(streamMoreData);
-    };
-    streamMoreData();
+
+      let nextSampleIndex = lastSample.i + 1
+      let nextSampleTimeExact = tFirstSample + nextSampleIndex * sampleIntervalMs
+      let nextSampleTimeRangeMin = nextSampleTimeExact - sampleIntervalMs / 2
+      let nextSampleTimeRangeMax = nextSampleTimeExact + sampleIntervalMs / 2
+      if (tNow < nextSampleTimeRangeMin) {
+          // Too frequent samples must be scrapped. If this results in visual problems then sample rate must be increased.
+          // console.warn(`Skipped too frequent sample`)
+          return
+      }
+      if (tNow > nextSampleTimeRangeMax) {
+          // At least 1 sample was skipped. In this case, the missing sample slots are filled with the values of the last sample.
+          let repeatedSamplesCount = 0
+          do {
+              clbk(lastSample.sample)
+              repeatedSamplesCount += 1
+              nextSampleIndex += 1
+              nextSampleTimeExact = tFirstSample + nextSampleIndex * sampleIntervalMs
+              nextSampleTimeRangeMin = nextSampleTimeExact - sampleIntervalMs / 2
+              nextSampleTimeRangeMax = nextSampleTimeExact + sampleIntervalMs / 2
+          } while (tNow > nextSampleTimeRangeMax)
+
+          clbk(sample)
+          lastSample = { sample, time: tNow, i: nextSampleIndex }
+          // console.warn(`Filled ${repeatedSamplesCount} samples`)
+          return
+      }
+      // Sample arrived within acceptable, expected time range.
+      clbk(sample)
+      lastSample = { sample, time: tNow, i: nextSampleIndex }
+    }
   });
