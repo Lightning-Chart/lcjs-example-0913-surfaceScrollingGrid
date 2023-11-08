@@ -11,6 +11,7 @@ const sampleRateHz = 35
 const sampleIntervalMs = 1000 / sampleRateHz
 
 // Create empty dashboard and charts.
+// NOTE: Using `Dashboard` is no longer recommended for new applications. Find latest recommendations here: https://lightningchart.com/js-charts/docs/basic-topics/grouping-charts/
 const dashboard = lightningChart()
     .Dashboard({
         numberOfColumns: 2,
