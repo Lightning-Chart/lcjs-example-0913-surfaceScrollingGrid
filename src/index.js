@@ -66,7 +66,7 @@ fetch(document.head.baseURI + 'examples/assets/0913/audio2ch.json')
                 .getDefaultAxisX()
                 .setTickStrategy(AxisTickStrategies.Time)
                 .setScrollStrategy(AxisScrollStrategies.progressive)
-                .setInterval({ start: -historyMs, end: 0, stopAxisAfter: false })
+                .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
             chart2D.getDefaultAxisY().setTitle('Frequency (Hz)')
 
             const chart3D = dashboard
@@ -80,7 +80,7 @@ fetch(document.head.baseURI + 'examples/assets/0913/audio2ch.json')
                 .getDefaultAxisX()
                 .setTickStrategy(AxisTickStrategies.Time)
                 .setScrollStrategy(AxisScrollStrategies.progressive)
-                .setInterval({ start: -historyMs, end: 0, stopAxisAfter: false })
+                .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
             chart3D
                 .getDefaultAxisY()
                 .setTitle('Intensity (dB)')
