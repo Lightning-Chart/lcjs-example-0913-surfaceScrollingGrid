@@ -24,7 +24,7 @@ const dashboard = lightningChart()
 let labelLoading = dashboard.addUIElement().setText('Loading example data ...')
 
 // Load example data from file.
-fetch(document.head.baseURI + 'examples/assets/0913/audio2ch.json')
+fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pathname + 'examples/assets/0913/audio2ch.json')
     .then((r) => r.json())
     .then((data) => {
         labelLoading.dispose()
