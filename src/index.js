@@ -2,7 +2,7 @@
  * Example showcasing the Surface Scrolling Grid Series feature of LightningChart JS.
  */
 
-const lcjs = require('@arction/lcjs')
+const lcjs = require('@lightningchart/lcjs')
 const { lightningChart, LUT, ColorHSV, PalettedFill, emptyLine, AxisScrollStrategies, AxisTickStrategies, regularColorSteps, Themes } = lcjs
 
 const historyMs = 27 * 1000
@@ -69,7 +69,7 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
                 .setTickStrategy(AxisTickStrategies.Time)
                 .setScrollStrategy(AxisScrollStrategies.progressive)
                 .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
-            chart2D.getDefaultAxisY().setTitle('Frequency (Hz)')
+            chart2D.getDefaultAxisY().setTitle('Frequency').setUnits('Hz')
 
             const chart3D = dashboard
                 .createChart3D({
@@ -85,18 +85,19 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
                 .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
             chart3D
                 .getDefaultAxisY()
-                .setTitle('Intensity (dB)')
+                .setTitle('Intensity')
+                .setUnits('dB')
                 .setTickStrategy(AxisTickStrategies.Numeric, (ticks) =>
                     ticks.setFormattingFunction((y) => intensityValueToDb(y).toFixed(0)),
                 )
-            chart3D.getDefaultAxisZ().setTitle('Frequency (Hz)')
+            chart3D.getDefaultAxisZ().setTitle('Frequency').setUnits('Hz')
 
             const heatmapSeries2D = chart2D
                 .addHeatmapScrollingGridSeries({
                     scrollDimension: 'columns',
                     resolution: rows,
-                    step: { x: sampleIntervalMs, y: rowStep },
                 })
+                .setStep({ x: sampleIntervalMs, y: rowStep })
                 .setFillStyle(new PalettedFill({ lut }))
                 .setWireframeStyle(emptyLine)
                 .setDataCleaning({ maxDataPointCount: 10000 })
@@ -106,8 +107,8 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
                     scrollDimension: 'columns',
                     columns: Math.ceil(historyMs / sampleIntervalMs),
                     rows,
-                    step: { x: sampleIntervalMs, z: rowStep },
                 })
+                .setStep({ x: sampleIntervalMs, z: rowStep })
                 .setFillStyle(new PalettedFill({ lut, lookUpProperty: 'y' }))
                 .setWireframeStyle(emptyLine)
 
