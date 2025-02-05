@@ -8,7 +8,9 @@ const { lightningChart, LUT, ColorHSV, PalettedFill, emptyLine, AxisScrollStrate
 const historyMs = 27 * 1000
 // Sampling rate as samples per second.
 const sampleRateHz = 35
-const sampleIntervalMs = 1000 / sampleRateHz
+// Minimum time step that can be displayed by the heatmap. In this example, set to half of average interval between samples. In normal applications you can set this to some comfortably small value.
+// Smaller value means more precision but more RAM and GPU memory usage.
+const heatmapMinTimeStepMs = (0.5 * 1000) / sampleRateHz
 
 // Create empty dashboard and charts.
 // NOTE: Using `Dashboard` is no longer recommended for new applications. Find latest recommendations here: https://lightningchart.com/js-charts/docs/basic-topics/grouping-charts/
@@ -56,7 +58,7 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
             },
         ]
 
-        channelList = channelList.map((channel) => {
+        channelList = channelList.map((channel, iii) => {
             const rows = channel.data[0].length
             const chart2D = dashboard
                 .createChartXY({
@@ -64,12 +66,10 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
                     rowIndex: 0,
                 })
                 .setTitle(`${channel.name} | 2D audio spectrogram`)
-            chart2D
-                .getDefaultAxisX()
-                .setTickStrategy(AxisTickStrategies.Time)
+            chart2D.axisX
                 .setScrollStrategy(AxisScrollStrategies.progressive)
                 .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
-            chart2D.getDefaultAxisY().setTitle('Frequency').setUnits('Hz')
+            chart2D.axisY.setTitle('Frequency').setUnits('Hz')
 
             const chart3D = dashboard
                 .createChart3D({
@@ -78,13 +78,10 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
                 })
                 .setTitle(`${channel.name} | 3D audio spectrogram`)
 
-            chart3D
-                .getDefaultAxisX()
-                .setTickStrategy(AxisTickStrategies.Time)
+            chart3D.axisX
                 .setScrollStrategy(AxisScrollStrategies.progressive)
                 .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
-            chart3D
-                .getDefaultAxisY()
+            chart3D.axisY
                 .setTitle('Intensity')
                 .setUnits('dB')
                 .setTickStrategy(AxisTickStrategies.Numeric, (ticks) =>
@@ -97,7 +94,7 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
                     scrollDimension: 'columns',
                     resolution: rows,
                 })
-                .setStep({ x: sampleIntervalMs, y: rowStep })
+                .setStep({ x: heatmapMinTimeStepMs, y: rowStep })
                 .setFillStyle(new PalettedFill({ lut }))
                 .setWireframeStyle(emptyLine)
                 .setDataCleaning({ maxDataPointCount: 10000 })
@@ -105,38 +102,59 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
             const surfaceSeries3D = chart3D
                 .addSurfaceScrollingGridSeries({
                     scrollDimension: 'columns',
-                    columns: Math.ceil(historyMs / sampleIntervalMs),
+                    columns: Math.ceil(historyMs / heatmapMinTimeStepMs),
                     rows,
                 })
-                .setStep({ x: sampleIntervalMs, z: rowStep })
+                .setStep({ x: heatmapMinTimeStepMs, z: rowStep })
                 .setFillStyle(new PalettedFill({ lut, lookUpProperty: 'y' }))
                 .setWireframeStyle(emptyLine)
 
             return { ...channel, chart2D, chart3D, heatmapSeries2D, surfaceSeries3D }
         })
 
-        // Setup infinite streaming from static data set.
-        let tStart = window.performance.now()
-        let pushedDataCount = 0
-        const streamData = () => {
-            const tNow = window.performance.now()
-            // NOTE: This code is for example purposes (streaming stable data rate without destroying browser when switching tabs etc.)
-            // In real use cases, data should be pushed in when it comes.
-            const shouldBeDataPointsCount = Math.floor((sampleRateHz * (tNow - tStart)) / 1000)
-            const newDataPointsCount = Math.min(shouldBeDataPointsCount - pushedDataCount, 100) // Add max 100 samples per frame into a series. This prevents massive performance spikes when switching tabs for long times
-            if (newDataPointsCount > 0) {
-                channelList.forEach((channel, i) => {
-                    const newDataPoints = []
-                    for (let iDp = 0; iDp < newDataPointsCount; iDp++) {
-                        const iData = (pushedDataCount + iDp) % channel.data.length
-                        const sample = channel.data[iData]
-                        newDataPoints.push(sample)
-                    }
-                    channel.heatmapSeries2D.addIntensityValues(newDataPoints)
-                    channel.surfaceSeries3D.addValues({ yValues: newDataPoints })
+        let tFirstSample
+        const handleIncomingData = (channel, timestamp, sample) => {
+            if (!tFirstSample) {
+                tFirstSample = timestamp
+                channelList.forEach((ch) => {
+                    ch.chart2D.axisX.setTickStrategy(AxisTickStrategies.DateTime, (strategy) =>
+                        strategy.setDateOrigin(new Date(tFirstSample)),
+                    )
+                    ch.chart3D.axisX.setTickStrategy(AxisTickStrategies.DateTime, (strategy) =>
+                        strategy.setDateOrigin(new Date(tFirstSample)),
+                    )
                 })
-                pushedDataCount += newDataPointsCount
             }
+            // Calculate sample index from timestamp to place sample in correct location in heatmap.
+            const iSample = Math.round((timestamp - tFirstSample) / heatmapMinTimeStepMs)
+            channel.heatmapSeries2D.invalidateIntensityValues({
+                iSample,
+                values: [sample],
+            })
+            channel.surfaceSeries3D.invalidateValues({
+                iSample,
+                yValues: [sample],
+            })
+        }
+
+        // Setup infinite streaming from static data set.
+        let iData = 0
+        let tPrev = Date.now()
+        let dModulus = 0
+        const streamData = () => {
+            const tNow = Date.now()
+            let addDataPointCount = ((tNow - tPrev) * sampleRateHz) / 1000 + dModulus
+            dModulus = addDataPointCount % 1
+            addDataPointCount = Math.floor(addDataPointCount)
+            channelList.forEach((channel) => {
+                for (let i = 0; i < addDataPointCount; i += 1) {
+                    const timestamp = tPrev + ((i + 1) / addDataPointCount) * (tNow - tPrev)
+                    const sample = channel.data[(iData + i) % channel.data.length]
+                    handleIncomingData(channel, timestamp, sample)
+                }
+            })
+            iData += addDataPointCount
+            tPrev = tNow
             requestAnimationFrame(streamData)
         }
         streamData()
