@@ -62,24 +62,26 @@ fetch(new URL(document.head.baseURI).origin + new URL(document.head.baseURI).pat
             const rows = channel.data[0].length
             const chart2D = dashboard
                 .createChartXY({
+                    legend: { visible: false },
                     columnIndex: channel.columnIndex,
                     rowIndex: 0,
                 })
                 .setTitle(`${channel.name} | 2D audio spectrogram`)
             chart2D.axisX
-                .setScrollStrategy(AxisScrollStrategies.progressive)
+                .setScrollStrategy(AxisScrollStrategies.scrolling)
                 .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
             chart2D.axisY.setTitle('Frequency').setUnits('Hz')
 
             const chart3D = dashboard
                 .createChart3D({
+                    legend: { visible: false },
                     columnIndex: channel.columnIndex,
                     rowIndex: 1,
                 })
                 .setTitle(`${channel.name} | 3D audio spectrogram`)
 
             chart3D.axisX
-                .setScrollStrategy(AxisScrollStrategies.progressive)
+                .setScrollStrategy(AxisScrollStrategies.scrolling)
                 .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
             chart3D.axisY
                 .setTitle('Intensity')

@@ -58,7 +58,6 @@ The performance bottleneck in scrolling spectrogram applications is generally ax
 * [Color shading styles (3D)]
 * [Surface Grid Series]
 * [Heatmap Grid Series]
-* [Legend Box]
 * [Axis scroll strategies]
 * [Axis tick strategies]
 
@@ -84,15 +83,14 @@ Direct developer email support can be purchased through a [Support Plan][4] or b
 © LightningChart Ltd 2009-2022. All rights reserved.
 
 
-[3D chart]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/Chart3D.html
-[3D axis]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/Axis3D.html
-[Paletted Fill]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/PalettedFill.html
-[Color lookup table]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/LUT.html
-[Color HSV factory]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/functions/ColorHSV.html
-[Color shading styles (3D)]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/variables/ColorShadingStyles.html
-[Surface Grid Series]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/SurfaceGridSeries3D.html
-[Heatmap Grid Series]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/HeatmapGridSeriesIntensityValues.html
-[Legend Box]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/classes/Chart.html#addLegendBox
-[Axis scroll strategies]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/variables/AxisScrollStrategies.html
-[Axis tick strategies]: https://lightningchart.com/js-charts/api-documentation/v7.1.0/variables/AxisTickStrategies.html
+[3D chart]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/classes/Chart3D.html
+[3D axis]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/classes/Axis3D.html
+[Paletted Fill]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/classes/PalettedFill.html
+[Color lookup table]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/classes/LUT.html
+[Color HSV factory]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/functions/ColorHSV.html
+[Color shading styles (3D)]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/variables/ColorShadingStyles.html
+[Surface Grid Series]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/classes/SurfaceGridSeries3D.html
+[Heatmap Grid Series]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/classes/HeatmapGridSeriesIntensityValues.html
+[Axis scroll strategies]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/variables/AxisScrollStrategies.html
+[Axis tick strategies]: https://lightningchart.com/js-charts/api-documentation/v8.0.0/variables/AxisTickStrategies.html
 
