@@ -25,7 +25,7 @@ This works otherwise same as `SurfaceGridSeries`, except that it is designed exp
 
 `SurfaceScrollingGridSeries` is the 3D variant of [`HeatmapScrollingGridSeries`](https://lightningchart.com/lightningchart-js-api-documentation/v3.2.0/classes/heatmapscrollinggridseries.html). This is highlighted in this example, by displaying the same data in both 2D and 3D at the same time on top of another.
 
-This example visualizes the frequency spectrum of a short audio clip (about 9 seconds long) of a truck driving. The visualization is done in real-time, simulating applications that measure, analyse and display audio metrics in real-time. One such application is the [LightningChart Audio analysis showcase](https://arction.github.io/lcjs-showcase-audio/).
+This example visualizes the frequency spectrum of a short audio clip (about 9 seconds long) of a truck driving. The visualization is done in real-time, simulating applications that measure, analyse and display audio metrics in real-time. One such application is the [LightningChart Audio analysis showcase](https://lightning-chart.github.io/lcjs-showcase-audio/).
 
 Each spectrogram in this application displays ~35 samples per second, each sample having 308 data points. With 4 spectrograms, this sums to about 10 000 data points per second.
 
